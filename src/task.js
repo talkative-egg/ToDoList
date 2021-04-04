@@ -108,3 +108,5 @@ const taskManager = (() => {
     return { addProject, addTask, setTaskProperty, setTaskStatus };
 
 })();
+
+export { taskManager };
