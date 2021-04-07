@@ -1,9 +1,8 @@
-const Task = (taskTitle, taskDescription, taskDueDate, taskPriority) => {
+const Task = (taskTitle, taskDescription, taskDueDate) => {
 
     let title = taskTitle;
     let description = taskDescription;
     let dueDate = taskDueDate;
-    let priority = taskPriority;
     let finished = false;
 
     const setProperty = (newProperty) => {
@@ -19,9 +18,6 @@ const Task = (taskTitle, taskDescription, taskDueDate, taskPriority) => {
                     break;
                 case 'dueDate':
                     dueDate = newProperty[property];
-                    break;
-                case 'priority':
-                    priority = newProperty[priority];
                     break;
                 default:
                     break;
@@ -43,34 +39,37 @@ const Task = (taskTitle, taskDescription, taskDueDate, taskPriority) => {
 
     const getDueDate = () => dueDate;
 
-    const getPriority = () => priority;
-
     const getStatus = () => finished;
 
-    return { setProperty, setStatus, getTitle, getDescription, getDueDate, getPriority, getStatus };
+    return { setProperty, setStatus, getTitle, getDescription, getDueDate, getStatus };
 };
 
 const Project = (name) => {
 
-    const tasks = [];
+    const tasks = {};
     const projectName = name;
 
-    const addTask = (task) => {
-        tasks.push(task);
-        return tasks.length() - 1;
+    const addTask = (title, task) => {
+        tasks[title] = task;
     }
 
-    const setTaskProperty = (index, properties) => {
-        tasks[index].setProperty(properties);
+    const setTaskProperty = (title, properties) => {
+        tasks[title].setProperty(properties);
     }
 
-    const setTaskStatus = (index, status) => {
-        tasks[index].setStatus(status);
+    const setTaskStatus = (title, status) => {
+        tasks[title].setStatus(status);
+    }
+
+    const deleteTask = (title) => {
+        if(tasks[title] !== undefined){
+            delete tasks[title];
+        }
     }
 
     const getName = () => projectName;
 
-    return { addTask, setTaskProperty, setTaskStatus, getName };
+    return { addTask, setTaskProperty, setTaskStatus, deleteTask, getName };
 
 }
 
@@ -84,28 +83,41 @@ const taskManager = (() => {
         customizedProjects[projectName] = project;
     }
 
-    const addTask = (title, description, dueDate, priority, ...projects) => {
-        const task = Task(title, description, dueDate, priority);
-        defaultProject.addTask(task);
+    const addTask = (title, description, dueDate, ...projects) => {
+        const task = Task(title, description, dueDate);
+        defaultProject.addTask(title, task);
         for(let projectName in projects){
             if(customizedProjects.keys().includes(projectName)){
-                customizedProjects[projectName].addTask(task);
+                customizedProjects[projectName].addTask(title, task);
             }else{
                 addProject(projectName);
-                customizedProjects[projectName].addTask(task);
+                customizedProjects[projectName].addTask(title, task);
             }
         }
     }
 
-    const setTaskProperty = (index, properties) => {
-        defaultProject.setTaskProperty(index, properties);
+    const setTaskProperty = (title, properties) => {
+        defaultProject.setTaskProperty(title, properties);
     }
 
-    const setTaskStatus = (index, status) => {
-        defaultProject.setTaskStatus(index, status);
+    const setTaskStatus = (title, status) => {
+        defaultProject.setTaskStatus(title, status);
     }
 
-    return { addProject, addTask, setTaskProperty, setTaskStatus };
+    const deleteTask = (title) => {
+        defaultProject.deleteTask(title);
+        Object.values(customizedProjects).forEach(e => function(){
+            e.deleteTask(title);
+        });
+    }
+
+    const deleteProject = (title) => {
+        if(customizedProjects[title] !== undefined){
+            delete customizedProjects[title];
+        }
+    }
+
+    return { addProject, addTask, setTaskProperty, setTaskStatus, deleteTask, deleteProject };
 
 })();
 
