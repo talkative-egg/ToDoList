@@ -1,3 +1,4 @@
 import { DOM } from './DOM';
+import { taskManager } from './task';
 
-DOM.renderInitialPage();
+events.emit("init");

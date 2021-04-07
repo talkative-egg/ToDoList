@@ -69,14 +69,16 @@ const Project = (name) => {
 
     const getName = () => projectName;
 
-    return { addTask, setTaskProperty, setTaskStatus, deleteTask, getName };
+    const getTasks = () => tasks;
+
+    return { addTask, setTaskProperty, setTaskStatus, deleteTask, getName, getTasks };
 
 }
 
 const taskManager = (() => {
 
     const customizedProjects = {};
-    const defaultProject = Project("default");
+    const defaultProject = Project("All Tasks");
 
     const addProject = (projectName) => {
         const project = Project(projectName);
@@ -86,12 +88,12 @@ const taskManager = (() => {
     const addTask = (title, description, dueDate, ...projects) => {
         const task = Task(title, description, dueDate);
         defaultProject.addTask(title, task);
-        for(let projectName in projects){
-            if(customizedProjects.keys().includes(projectName)){
-                customizedProjects[projectName].addTask(title, task);
+        for(let i = 0; i < projects.length; i++){
+            if(customizedProjects[projects[i]]){
+                customizedProjects[projects[i]].addTask(title, task);
             }else{
-                addProject(projectName);
-                customizedProjects[projectName].addTask(title, task);
+                addProject(projects[i]);
+                customizedProjects[projects[i]].addTask(title, task);
             }
         }
     }
@@ -106,7 +108,7 @@ const taskManager = (() => {
 
     const deleteTask = (title) => {
         defaultProject.deleteTask(title);
-        Object.values(customizedProjects).forEach(e => function(){
+        Object.values(customizedProjects).forEach(function(e){
             e.deleteTask(title);
         });
     }
@@ -116,6 +118,17 @@ const taskManager = (() => {
             delete customizedProjects[title];
         }
     }
+
+    const initialize = () => {
+        addTask("example1", "Lorem ipsum dolor sit Amet", "today");
+        addTask("example2", "Lorem ipsum dolor sit Amet", "today");
+        addProject("Sample Project");
+        addTask("example3", "Lorem ipsum dolor sit Amet", "today", "Sample Project");
+        events.emit("renderProjects", {defaultProject, ...customizedProjects});
+        events.emit("renderTasks", defaultProject.getTasks());
+    }
+
+    events.on("init", initialize);
 
     return { addProject, addTask, setTaskProperty, setTaskStatus, deleteTask, deleteProject };
 

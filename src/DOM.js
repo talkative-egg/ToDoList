@@ -1,16 +1,16 @@
 const DOM = (() => {
 
     const content = document.querySelector("#content");
-    const mainContent = _makeDiv({id: "main-content"});
+    const mainContent = makeDiv({id: "main-content"});
     content.appendChild(mainContent);
 
-    function _makeText(tag, text){
+    function makeText(tag, text){
         const element = document.createElement(`${tag}`);
         element.textContent = text;
         return element;
     }
 
-    function _makeDiv(attributes = {}){
+    function makeDiv(attributes = {}){
 
         const div = document.createElement("div");
 
@@ -30,7 +30,7 @@ const DOM = (() => {
 
     }
 
-    function _makeButton(text){
+    function makeButton(text){
         
         const button = document.createElement("button");
         button.textContent = text;
@@ -39,11 +39,11 @@ const DOM = (() => {
 
     }
 
-    function _makeTask(taskName, taskDescription, taskDueDate){
+    function makeTask(taskName, taskDescription, taskDueDate){
 
-        const container = _makeDiv({class: "task"});
+        const container = makeDiv({class: "task"});
 
-        const finishButton = _makeDiv({class: "finish-button"});
+        const finishButton = makeDiv({class: "finish-button"});
 
         finishButton.addEventListener("click", function(){
 
@@ -56,17 +56,17 @@ const DOM = (() => {
             
         });
 
-        const textContainer = _makeDiv({class: "task-description"});
+        const textContainer = makeDiv({class: "task-description"});
 
-        const title = _makeText("h2", `${taskName}`);
-        const description = _makeText("p", `${taskDescription}`);
+        const title = makeText("h2", `${taskName}`);
+        const description = makeText("p", `${taskDescription}`);
         textContainer.appendChild(title);
         textContainer.appendChild(description);
 
-        const dueContainer = _makeDiv({class: "due-date"});
+        const dueContainer = makeDiv({class: "due-date"});
 
-        dueContainer.appendChild(_makeText("p", "Due Date:"));
-        dueContainer.appendChild(_makeText("p", `${taskDueDate}`));
+        dueContainer.appendChild(makeText("p", "Due Date:"));
+        dueContainer.appendChild(makeText("p", `${taskDueDate}`));
         
         container.appendChild(finishButton);
         container.appendChild(textContainer);
@@ -76,86 +76,78 @@ const DOM = (() => {
 
     }
 
-    const _renderProjectContainer = () => {
+    const renderProjectContainer = (projects) => {
 
-        const container = _makeDiv({id: "project-container"});
+        const container = makeDiv({id: "project-container"});
 
-        const title = _makeText("h1", "Projects");
+        const title = makeText("h1", "Projects");
         const hr = document.createElement("hr");
 
-        const projects = _makeDiv({id: "projects"});
+        const innerContainer = makeDiv({id: "projects"});
 
-        const project1 = _makeDiv({class: "project", text: "Project 1"});
-        const project2 = _makeDiv({class: "project", text: "Project 2"});
+        Object.values(projects).forEach(function(e){
+            const project = makeDiv({class: "project", text: `${e.getName()}`});
+            innerContainer.appendChild(project);
+        });
 
-        projects.appendChild(project1);
-        projects.appendChild(project2);
-
-        const addButton = _makeButton("Add Project");
-        const deleteButton = _makeButton("Delete Project");
+        const addButton = makeButton("Add Project");
+        const deleteButton = makeButton("Delete Project");
 
         container.appendChild(title);
         container.appendChild(hr);
-        container.appendChild(projects);
+        container.appendChild(innerContainer);
         container.appendChild(addButton);
         container.appendChild(deleteButton);
 
-        mainContent.appendChild(container);
+        mainContent.prepend(container);
 
     }
 
-    const _renderTaskContainer = () => {
+    const renderTaskContainer = (tasks) => {
+        
+        const container = makeDiv({id: "task-container"});
 
-        const container = _makeDiv({id: "task-container"});
-
-        const title = _makeText("h1", "Project1");
+        const title = makeText("h1", "Project 1");
         const hr = document.createElement("hr");
 
-        const tasks = _makeDiv({id: "tasks"});
+        const innerContainer = makeDiv({id: "tasks"});
 
-        tasks.appendChild(_makeTask("Task 1", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 2", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 3", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 4", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 5", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 6", "Lorem ipsum dolor sit amet.", "Today"));
-        tasks.appendChild(_makeTask("Task 7", "Lorem ipsum dolor sit amet.", "Today"));
+        Object.values(tasks).forEach(function(e){
+            const task = makeTask(`${e.getTitle()}`, `${e.getDescription()}`, `${e.getDueDate()}`);
+            innerContainer.appendChild(task);
+        })
 
         container.appendChild(title);
         container.appendChild(hr);
-        container.appendChild(tasks);
+        container.appendChild(innerContainer);
 
         mainContent.appendChild(container);
 
     }
 
-    const _renderNavBar = () => {
+    const renderNavBar = () => {
 
         const nav = document.createElement("nav");
 
-        const leftContainer = _makeDiv();
+        const leftContainer = makeDiv();
 
         const logo = document.createElement("img");
         logo.setAttribute("src", "../images/icon.png");
         logo.setAttribute("alt", "logo");
 
         leftContainer.appendChild(logo);
-        leftContainer.appendChild(_makeText("p", "ToDoList"));
+        leftContainer.appendChild(makeText("p", "ToDoList"));
 
         nav.appendChild(leftContainer);
-        nav.appendChild(_makeText("p", "Peter Chen"));
+        nav.appendChild(makeText("p", "Peter Chen"));
 
         content.prepend(nav);
 
     };
 
-    const renderInitialPage = () => {
-        _renderNavBar();
-        _renderProjectContainer();
-        _renderTaskContainer();
-    }
-
-    return { renderInitialPage };
+    events.on("init", renderNavBar);
+    events.on("renderProjects", renderProjectContainer);
+    events.on("renderTasks", renderTaskContainer);
 
 })();
 
