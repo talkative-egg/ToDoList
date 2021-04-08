@@ -67,11 +67,13 @@ const Project = (name) => {
         }
     }
 
+    const containsTask = (taskName) => (tasks[taskName])? true:false;
+
     const getName = () => projectName;
 
     const getTasks = () => tasks;
 
-    return { addTask, setTaskProperty, setTaskStatus, deleteTask, getName, getTasks };
+    return { addTask, setTaskProperty, setTaskStatus, deleteTask, containsTask, getName, getTasks };
 
 }
 
@@ -85,18 +87,17 @@ const taskManager = (() => {
         customizedProjects[projectName] = project;
         events.emit("renderProjects", Object.assign({}, {defaultProject, ...customizedProjects}));
         events.emit("setProjectTab", Object.assign({}, customizedProjects[projectName]));
+        events.emit("renderTasks", Object.assign({}, customizedProjects[projectName]));
     }
 
-    const addTask = (title, description, dueDate, ...projects) => {
+    const addTask = ({title, description, dueDate, project}) => {
         const task = Task(title, description, dueDate);
         defaultProject.addTask(title, task);
-        for(let i = 0; i < projects.length; i++){
-            if(customizedProjects[projects[i]]){
-                customizedProjects[projects[i]].addTask(title, task);
-            }else{
-                addProject(projects[i]);
-                customizedProjects[projects[i]].addTask(title, task);
-            }
+        if(customizedProjects[project]){
+            customizedProjects[project].addTask(title, task);
+            events.emit("renderTasks", Object.assign({}, customizedProjects[project]));
+        }else{
+            events.emit("renderTasks", Object.assign({}, defaultProject));
         }
     }
 
@@ -104,8 +105,8 @@ const taskManager = (() => {
         defaultProject.setTaskProperty(title, properties);
     }
 
-    const setTaskStatus = (title, status) => {
-        defaultProject.setTaskStatus(title, status);
+    const setTaskStatus = (task) => {
+        defaultProject.setTaskStatus(task.taskName, task.status);
     }
 
     const deleteTask = (title) => {
@@ -124,18 +125,20 @@ const taskManager = (() => {
     }
 
     const initialize = () => {
-        addTask("example1", "Lorem ipsum dolor sit Amet", "today");
-        addTask("example2", "Lorem ipsum dolor sit Amet", "today");
+        addTask({title: "example1", description: "Lorem ipsum dolor sit Amet", dueDate: "today", project: ""});
+        addTask({title: "example2", description: "Lorem ipsum dolor sit Amet", dueDate: "today", project: ""});
         addProject("Sample Project");
-        addTask("example3", "Lorem ipsum dolor sit Amet", "today", "Sample Project");
+        addTask({title: "example3", description: "Lorem ipsum dolor sit Amet", dueDate: "today", project: "Sample Project"});
         events.emit("renderProjects", Object.assign({}, {defaultProject, ...customizedProjects}));
-        events.emit("renderTasks", Object.assign({}, defaultProject.getTasks()));
+        events.emit("renderTasks", Object.assign({}, defaultProject));
         events.emit("setProjectTab", Object.assign({}, defaultProject));
     }
 
     events.on("init", initialize);
     events.on("newProject", addProject);
     events.on("deleteProject", deleteProject);
+    events.on("newTask", addTask);
+    events.on("taskStatus", setTaskStatus);
 
     return { addProject, addTask, setTaskProperty, setTaskStatus, deleteTask, deleteProject };
 

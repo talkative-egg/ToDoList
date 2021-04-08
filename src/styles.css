@@ -212,3 +212,25 @@ nav p{
     font-size: 20px;
     margin-bottom: 5px;
 }
+
+#myForm{
+    position: fixed;
+    z-index: 9;
+    width: 600px;
+    height: 450px;
+    left: 50vw;
+    margin-left: -300px;
+    top: 15%;
+    background-color: lightgrey;
+    text-align: center;
+    box-shadow: 5px 8px 5px 1px #000000;
+}
+
+#myForm img{
+    width: 30px;
+    height: 30px;
+}
+
+#myForm img:hover{
+    cursor: pointer;
+}

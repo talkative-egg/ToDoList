@@ -41,19 +41,29 @@ const DOM = (() => {
 
     }
 
-    function makeTask(taskName, taskDescription, taskDueDate){
+    function makeTask(taskName, taskDescription, taskDueDate, finish = false){
 
         const container = makeDiv({class: "task"});
 
         const finishButton = makeDiv({class: "finish-button"});
 
+        if(finish){
+            finishButton.style.backgroundImage = 'url("../images/check.png")';
+            finishButton.style.backgroundSize = 'cover';
+            container.style.backgroundColor = 'lightgrey';
+        }
+
         finishButton.addEventListener("click", function(){
 
             if(finishButton.style.backgroundImage === 'url("../images/check.png")'){
                 finishButton.style.backgroundImage = 'none';
+                container.style.backgroundColor = 'white';
+                events.emit("taskStatus", {taskName, status: false});
             }else{
                 finishButton.style.backgroundImage = 'url("../images/check.png")';
                 finishButton.style.backgroundSize = 'cover';
+                container.style.backgroundColor = 'lightgrey';
+                events.emit("taskStatus", {taskName, status: true});
             }
             
         });
@@ -163,6 +173,12 @@ const DOM = (() => {
 
         Object.values(projects).forEach(function(e){
             const project = makeDiv({class: "project", text: `${e.getName()}`});
+
+            project.addEventListener("click", function(i){
+                events.emit("renderTasks", e);
+                events.emit("setProjectTab", e);
+            });
+
             innerContainer.appendChild(project);
         });
 
@@ -234,17 +250,119 @@ const DOM = (() => {
 
     }
 
-    const renderTaskContainer = (tasks) => {
+    function makeLabel(forAttribute, text){
 
-        const container = makeDiv({id: "task-container"});
+        const label = document.createElement("label");
+        label.textContent = text;
+        label.setAttribute("for", forAttribute);
+        return label;
 
-        const title = makeText("h1", "Project 1");
+    }
+
+    function makeInput(type, placeholder, id, required){
+
+        const input = document.createElement("input");
+        input.setAttribute("type", type);
+        input.setAttribute("placeholder", placeholder);
+        input.setAttribute("name", id);
+        input.id = id;
+        input.required = required;
+        return input;
+
+    }
+
+    function renderAddTaskPopUp(project){
+
+        const container = makeDiv({id: "myForm"});
+
+        const form = document.createElement("form");
+        form.id = "form-container";
+
+        const formTitle = makeText("h1", "New Task");
+
+        const titleLabel = makeLabel("title", "Task Name: ");
+        const titleInput = makeInput("text", "Task Name", "title", true);
+
+        const descriptionLabel = makeLabel("description", "Task Description: ");
+        const descriptionInput = document.createElement("textarea");
+        descriptionInput.setAttribute("placeholder", "Task Descripiton");
+        descriptionInput.setAttribute("name", "description");
+        descriptionInput.id = "description";
+
+        const dateLabel = makeLabel("dueDate", "Due Date: ");
+        const dateInput = makeInput("date", "", "dueDate", true);
+
+        const confirm = document.createElement("img");
+        confirm.setAttribute("src", "../images/confirm.png");
+        confirm.setAttribute("alt", "confirm");
+        const cancel = document.createElement("img");
+        cancel.setAttribute("src", "../images/cancel.png");
+        cancel.setAttribute("alt", "cancel");
+
+        form.appendChild(formTitle);
+        form.appendChild(titleLabel);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(titleInput);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(descriptionLabel);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(descriptionInput);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(dateLabel);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(dateInput);
+        form.appendChild(document.createElement("br"));
+        form.appendChild(confirm);
+        form.appendChild(cancel);
+
+        container.appendChild(form);
+        content.appendChild(container);
+
+        confirm.addEventListener("click", function(e){
+
+            if(project.containsTask(titleInput.value)){
+                alert("already has this task");
+            }else if(titleInput.value != ""){
+                events.emit("newTask", {
+                    title: titleInput.value,
+                    description:  descriptionInput.value,
+                    dueDate:  dateInput.value,
+                    project: project.getName()
+                });
+                content.removeChild(container);
+            }else{
+                alert("must have a title");
+            }
+
+        });
+
+        cancel.addEventListener("click", function(e){
+            content.removeChild(container);
+        });
+
+    }
+
+    const renderTaskContainer = (project) => {
+
+        let alreadyHasTasks = (document.querySelector("#task-container") == null)?
+            false : true;
+
+        let container;
+
+        if(alreadyHasTasks){
+            container = document.querySelector("#task-container");
+            removeAllChildren(container);
+        }else{
+            container = makeDiv({id: "task-container"});
+        }
+
+        const title = makeText("h1", `${project.getName()}`);
         const hr = document.createElement("hr");
 
         const innerContainer = makeDiv({id: "tasks"});
 
-        Object.values(tasks).forEach(function(e){
-            const task = makeTask(`${e.getTitle()}`, `${e.getDescription()}`, `${e.getDueDate()}`);
+        Object.values(project.getTasks()).forEach(function(e){
+            const task = makeTask(e.getTitle(), e.getDescription(), e.getDueDate(), e.getStatus());
             innerContainer.appendChild(task);
         })
 
@@ -255,7 +373,11 @@ const DOM = (() => {
         container.appendChild(hr);
         container.appendChild(innerContainer);
 
-        mainContent.appendChild(container);
+        addButton.addEventListener("click", function(e){
+            renderAddTaskPopUp(project);
+        });
+
+        if(!alreadyHasTasks) mainContent.appendChild(container);
 
     }
 
