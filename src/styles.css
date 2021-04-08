@@ -65,6 +65,7 @@ nav p{
     background-color: #E8E2DB;
     width: 20%;
     height: cover;
+    text-align: center;
 }
 
 #project-container h1{
@@ -77,21 +78,29 @@ nav p{
 }
 
 #projects{
-    width: 80%;
+    width: 100%;
     margin: 20px auto 0px auto;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    text-align: left;
+}
+
+#delete-project-container{
+    width: 80%;
+    height: auto;
+    margin: 0px auto 15px auto;
+    display: flex;
+    flex-direction: row;
 }
 
 .project{
-    width: 100%;
+    width: 80%;
     height: auto;
-    margin-bottom: 15px;
+    margin: 0 auto 15px auto;
     padding: 5px 0px 5px 10px;
-    padding-left: 10px;
     background-color: #c1c6c7;
-    box-shadow: 5px 1px #000000;
+    box-shadow: 3px 1px #000000;
     font-size: 23px;
 }
 
@@ -100,7 +109,7 @@ nav p{
     cursor: pointer;
 }
 
-#project-container button{
+#project-container button, #task-container button{
     font-size: 15px;
     font-weight: bold;
     padding: 8px;
@@ -109,7 +118,41 @@ nav p{
     margin-right: 25px;
 }
 
-#project-container button:hover{
+#project-container button, #task-container button:hover{
+    cursor: pointer;
+}
+
+#new-project{
+    width: 80%;
+    height: auto;
+    margin: 0px auto 15px auto;
+    display: flex;
+    flex-direction: row;
+}
+
+#project-container input{
+    width: 90%;
+    height: auto;
+    margin: 0px auto 0px auto;
+    padding: 5px 0px 5px 10px;
+    background-color: #c1c6c7;
+    font-size: 23px;
+    border: none;
+    text-align: left;
+    box-shadow: 3px 1px #000000;
+}
+
+#project-container input:focus{
+    outline: none;
+}
+
+#project-container img{
+    margin: auto auto auto 10px;
+    width: 25px;
+    height: 25px;
+}
+
+#project-container img:hover{
     cursor: pointer;
 }
 

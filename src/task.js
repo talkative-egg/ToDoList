@@ -83,6 +83,8 @@ const taskManager = (() => {
     const addProject = (projectName) => {
         const project = Project(projectName);
         customizedProjects[projectName] = project;
+        events.emit("renderProjects", Object.assign({}, {defaultProject, ...customizedProjects}));
+        events.emit("setProjectTab", Object.assign({}, customizedProjects[projectName]));
     }
 
     const addTask = (title, description, dueDate, ...projects) => {
@@ -117,6 +119,8 @@ const taskManager = (() => {
         if(customizedProjects[title] !== undefined){
             delete customizedProjects[title];
         }
+
+        events.emit("renderDeleteProjects", Object.assign({}, {defaultProject, ...customizedProjects}));
     }
 
     const initialize = () => {
@@ -124,11 +128,14 @@ const taskManager = (() => {
         addTask("example2", "Lorem ipsum dolor sit Amet", "today");
         addProject("Sample Project");
         addTask("example3", "Lorem ipsum dolor sit Amet", "today", "Sample Project");
-        events.emit("renderProjects", {defaultProject, ...customizedProjects});
-        events.emit("renderTasks", defaultProject.getTasks());
+        events.emit("renderProjects", Object.assign({}, {defaultProject, ...customizedProjects}));
+        events.emit("renderTasks", Object.assign({}, defaultProject.getTasks()));
+        events.emit("setProjectTab", Object.assign({}, defaultProject));
     }
 
     events.on("init", initialize);
+    events.on("newProject", addProject);
+    events.on("deleteProject", deleteProject);
 
     return { addProject, addTask, setTaskProperty, setTaskStatus, deleteTask, deleteProject };
 
