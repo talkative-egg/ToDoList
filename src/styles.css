@@ -109,17 +109,32 @@ nav p{
     cursor: pointer;
 }
 
-#project-container button, #task-container button{
-    font-size: 15px;
-    font-weight: bold;
-    padding: 8px;
-    float: right;
-    margin: 10px 25px 0px 0px;
-    margin-right: 25px;
+#projects .currentTab{
+    box-shadow: none;
 }
 
-#project-container button, #task-container button:hover{
+#project-container img{
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+}
+
+#project-container h2{
+    margin: auto;
+}
+
+#project-container #add-button, #project-container #delete-button{
+    display: flex;
+    flex-direction: row;
+    font-size: 13px;
+    float: right;
+    margin: 10px 25px 0px 0px;
+    padding: 8px;
+}
+
+#project-container #add-button:hover, #project-container #delete-button:hover{
     cursor: pointer;
+    background-color: #dccdcd;
 }
 
 #new-project{
@@ -146,16 +161,6 @@ nav p{
     outline: none;
 }
 
-#project-container img{
-    margin: auto auto auto 10px;
-    width: 25px;
-    height: 25px;
-}
-
-#project-container img:hover{
-    cursor: pointer;
-}
-
 #task-container{
     width: 80%;
     height: cover;
@@ -173,16 +178,22 @@ nav p{
 }
 
 #tasks{
-    width: 90%;
+    width: 100%;
     height: calc(100% - 140px);
     margin: 0px auto 0px auto;
     overflow-y: auto;
 }
 
+#tasks button{
+    margin-right: 50px;
+}
+
 .task{
     border: 1px solid #000;
     border-radius: 5px;
+    width: 90%;
     height: auto;
+    margin: 0px auto 20px auto;
     margin-bottom: 20px;
     padding: 10px;
     display: flex;
@@ -190,13 +201,14 @@ nav p{
 }
 
 .task:hover{
-    box-shadow: 2px 1px #000000;
+    box-shadow: 2px 2px #686363;
     cursor: pointer;
 }
 
 .task .finish-button{
     height: 25px;
     width: 25px;
+    min-width: 25px;
     background-color: #bbb;
     border-radius: 50%;
     display: inline-block;
@@ -205,12 +217,71 @@ nav p{
 
 .task .task-description{
     margin-left: 20px;
-    width: 80%;
+    margin-right: 20px;
+    word-break: break-word;
+    width: 75%;
+    display: flex;
+    flex-direction: column;
 }
 
 .task h2{
     font-size: 20px;
     margin-bottom: 5px;
+}
+
+.task img{
+    width: 25px;
+    height: 25px;
+}
+
+.task #title{
+    width: 50%;
+    margin-bottom: 8px;
+}
+
+.task #buttons{
+    right: -42px;
+    height: cover;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.task #input-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 95%;
+}
+
+.task #text-edit{
+    width: 70%;
+}
+
+.task #date-edit{
+    margin-left: 50px;
+    width: auto;
+}
+
+#task-container #add-button{
+    display: flex;
+    flex-direction: row;
+    float: right;
+    padding: 8px;
+    margin-top: 5px;
+    margin-right: calc(5% + 10px);
+}
+
+#task-container #add-button:hover{
+    cursor: pointer;
+    background-color: #dccdcd;
+}
+
+#task-container #add-button img{
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
 }
 
 #myForm{
@@ -222,13 +293,35 @@ nav p{
     margin-left: -300px;
     top: 15%;
     background-color: lightgrey;
-    text-align: center;
-    box-shadow: 5px 8px 5px 1px #000000;
+    text-align: left;
+    box-shadow: 5px 8px 5px 1px #a09595;
+    border-radius: 20px;
+    padding: 40px 50px 0px 50px;
+}
+
+#myForm h1{
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+#myForm label{
+    font-size: 25px;
+}
+
+#myForm input, #myForm textarea{
+    margin: 8px 0px 15px 10px;
+    height: 40px;
+    width: 40%;
+}
+
+#myForm #buttons{
+    text-align: right;
 }
 
 #myForm img{
     width: 30px;
     height: 30px;
+    margin-left: 30px;
 }
 
 #myForm img:hover{

@@ -182,8 +182,23 @@ const DOM = (() => {
             innerContainer.appendChild(project);
         });
 
-        const addButton = makeButton("Add Project");
-        const deleteButton = makeButton("Delete Project");
+        const addButton = makeDiv({id: "add-button"});
+
+        const addImage = document.createElement("img");
+        addImage.setAttribute("src", "../images/add.png");
+        addImage.setAttribute("alt", "");
+        
+        addButton.appendChild(addImage);
+        addButton.appendChild(makeText("h2", "Add Project"));
+
+        const deleteButton = makeDiv({id: "delete-button"});
+
+        const deleteImage = document.createElement("img");
+        deleteImage.setAttribute("src", "../images/delete.png");
+        deleteImage.setAttribute("alt", "");
+        
+        deleteButton.appendChild(deleteImage);
+        deleteButton.appendChild(makeText("h2", "Delete Project"));
 
         container.appendChild(title);
         container.appendChild(hr);
@@ -207,7 +222,11 @@ const DOM = (() => {
             confirmIcon.setAttribute("alt", "confirm");
 
             confirmIcon.addEventListener("click", function(i){
-                events.emit("newProject", newProject.value);
+
+                if(newProject.value !== ""){
+                    events.emit("newProject", newProject.value);
+                }
+                
             });
 
             inputContainer.appendChild(newProject);
@@ -235,11 +254,11 @@ const DOM = (() => {
 
         projects.forEach(function(e){
             if(e.textContent == project.getName()){
-                e.style.boxShadow = "none";
+                e.classList.add("currentTab");
                 found = true;
                 currentProjectTab = project;
             }else{
-                e.style.boxShadow = "3px 1px #000000";
+                e.classList.remove("currentTab");
             }
         });
 
@@ -292,12 +311,17 @@ const DOM = (() => {
         const dateLabel = makeLabel("dueDate", "Due Date: ");
         const dateInput = makeInput("date", "", "dueDate", true);
 
+        const buttonContainer = makeDiv({id: "buttons"});
+
         const confirm = document.createElement("img");
         confirm.setAttribute("src", "../images/confirm.png");
         confirm.setAttribute("alt", "confirm");
         const cancel = document.createElement("img");
         cancel.setAttribute("src", "../images/cancel.png");
         cancel.setAttribute("alt", "cancel");
+
+        buttonContainer.appendChild(confirm);
+        buttonContainer.appendChild(cancel);
 
         form.appendChild(formTitle);
         form.appendChild(titleLabel);
@@ -312,10 +336,10 @@ const DOM = (() => {
         form.appendChild(document.createElement("br"));
         form.appendChild(dateInput);
         form.appendChild(document.createElement("br"));
-        form.appendChild(confirm);
-        form.appendChild(cancel);
+        form.appendChild(buttonContainer);
 
         container.appendChild(form);
+        
         content.appendChild(container);
 
         confirm.addEventListener("click", function(e){
@@ -342,7 +366,132 @@ const DOM = (() => {
 
     }
 
-    const renderTaskContainer = (project) => {
+    function renderEditTaskContainer(project, taskToEdit){
+
+        const container = document.querySelector("#task-container");
+        removeAllChildren(container);
+
+        const title = makeText("h1", `${project.getName()}`);
+        const hr = document.createElement("hr");
+
+        const innerContainer = makeDiv({id: "tasks"});
+
+        Object.values(project.getTasks()).forEach(function(e){
+
+            let task;
+
+            if(e.getTitle() == taskToEdit.getTitle()){
+
+                task = makeDiv({class: "task"});
+
+                const finishButton = makeDiv({class: "finish-button"});
+
+                if(e.getStatus()){
+                    finishButton.style.backgroundImage = 'url("../images/check.png")';
+                    finishButton.style.backgroundSize = 'cover';
+                    task.style.backgroundColor = 'lightgrey';
+                }
+
+                finishButton.addEventListener("click", function(){
+
+                    if(finishButton.style.backgroundImage === 'url("../images/check.png")'){
+                        finishButton.style.backgroundImage = 'none';
+                        task.style.backgroundColor = 'white';
+                        events.emit("taskStatus", {taskName, status: false});
+                    }else{
+                        finishButton.style.backgroundImage = 'url("../images/check.png")';
+                        finishButton.style.backgroundSize = 'cover';
+                        task.style.backgroundColor = 'lightgrey';
+                        events.emit("taskStatus", {taskName, status: true});
+                    }
+                    
+                });
+
+                const inputContainer = makeDiv({id: "input-container"});
+
+                const textContainer = makeDiv({class: "task-description", id: "text-edit"});
+
+                const taskTitle = makeInput("text", "Task Title", "title", true);
+                taskTitle.value = taskToEdit.getTitle();
+                const taskDescription = document.createElement("textarea");
+                taskDescription.setAttribute("placeholder", "Task Description");
+                taskDescription.id = "description";
+                taskDescription.value = taskToEdit.getDescription();
+                textContainer.appendChild(taskTitle);
+                textContainer.appendChild(taskDescription);
+
+                const dueContainer = makeDiv({class: "due-date", id: "date-edit"});
+
+                const dueDate = makeInput("date", "", "dueDate", false);
+                dueContainer.appendChild(makeText("p", "Due Date:"));
+                dueContainer.appendChild(dueDate);
+
+                inputContainer.appendChild(textContainer);
+                inputContainer.appendChild(dueContainer);
+
+                const buttonContainer = makeDiv({id: "buttons"});
+
+                const deleteButton = document.createElement("img");
+                deleteButton.setAttribute("src", "../images/delete.png");
+                deleteButton.setAttribute("alt", "Delete");
+
+                const confirmButton = document.createElement("img");
+                confirmButton.setAttribute("src", "../images/confirm.png");
+                confirmButton.setAttribute("alt", "confirm");
+
+                buttonContainer.appendChild(deleteButton);
+                buttonContainer.appendChild(confirmButton);
+
+                deleteButton.addEventListener("click", function(){
+                    events.emit("deleteTask", {project, title: e.getTitle()});
+                });
+
+                confirmButton.addEventListener("click", function(){
+                    events.emit("setTask", {project, originalTitle: taskToEdit.getTitle(), title: taskTitle.value, description: taskDescription.value, dueDate: dueDate.value});
+                });
+                
+                task.appendChild(finishButton);
+                task.appendChild(inputContainer);
+                task.appendChild(buttonContainer);
+
+            }else{
+                task = makeTask(e.getTitle(), e.getDescription(), e.getDueDate(), e.getStatus());
+
+                task.addEventListener("click", function(i){
+                    if(i.target.className !== "finish-button"){
+                        renderEditTaskContainer(project, e);
+                    }
+                });
+            }
+            
+
+            innerContainer.appendChild(task);
+        })
+
+        const addButton = makeDiv({id: "add-button"});
+
+        const addImage = document.createElement("img");
+        addImage.setAttribute("src", "../images/add.png");
+        addImage.setAttribute("alt", "New Task");
+
+        addButton.appendChild(addImage);
+        addButton.appendChild(makeText("h2", "New Task"));
+        
+        innerContainer.appendChild(addButton);
+
+        container.appendChild(title);
+        container.appendChild(hr);
+        container.appendChild(innerContainer);
+
+        addButton.addEventListener("click", function(e){
+            if(!document.querySelector("#myForm")){
+                renderAddTaskPopUp(project);
+            }
+        });
+
+    }
+
+    const renderTaskContainer = (project = currentProjectTab) => {
 
         let alreadyHasTasks = (document.querySelector("#task-container") == null)?
             false : true;
@@ -363,10 +512,25 @@ const DOM = (() => {
 
         Object.values(project.getTasks()).forEach(function(e){
             const task = makeTask(e.getTitle(), e.getDescription(), e.getDueDate(), e.getStatus());
+
+            task.addEventListener("click", function(i){
+                if(i.target.className !== "finish-button"){
+                    renderEditTaskContainer(project, e);
+                }
+            });
+
             innerContainer.appendChild(task);
         })
 
-        const addButton = makeButton("Add Task");
+        const addButton = makeDiv({id: "add-button"});
+
+        const addImage = document.createElement("img");
+        addImage.setAttribute("src", "../images/add.png");
+        addImage.setAttribute("alt", "New Task");
+
+        addButton.appendChild(addImage);
+        addButton.appendChild(makeText("h2", "New Task"));
+
         innerContainer.appendChild(addButton);
 
         container.appendChild(title);
@@ -374,7 +538,9 @@ const DOM = (() => {
         container.appendChild(innerContainer);
 
         addButton.addEventListener("click", function(e){
-            renderAddTaskPopUp(project);
+            if(!document.querySelector("#myForm")){
+                renderAddTaskPopUp(project);
+            }
         });
 
         if(!alreadyHasTasks) mainContent.appendChild(container);

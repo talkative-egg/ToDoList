@@ -6,7 +6,7 @@ const Task = (taskTitle, taskDescription, taskDueDate) => {
     let finished = false;
 
     const setProperty = (newProperty) => {
-        
+
         for(let property in newProperty){
 
             switch(property){
@@ -54,7 +54,14 @@ const Project = (name) => {
     }
 
     const setTaskProperty = (title, properties) => {
+
         tasks[title].setProperty(properties);
+
+        if(title !== properties.title){
+            tasks[properties.title] = tasks[title];
+            delete tasks[title];
+        }
+        
     }
 
     const setTaskStatus = (title, status) => {
@@ -101,19 +108,29 @@ const taskManager = (() => {
         }
     }
 
-    const setTaskProperty = (title, properties) => {
-        defaultProject.setTaskProperty(title, properties);
+    const setTaskProperty = (props) => {
+        defaultProject.setTaskProperty(props.originalTitle, props);
+
+        const projectRender = (customizedProjects[props.project.getName()])? 
+            customizedProjects[props.project.getName()] : defaultProject;
+
+        events.emit("renderTasks", projectRender);
     }
 
     const setTaskStatus = (task) => {
         defaultProject.setTaskStatus(task.taskName, task.status);
     }
 
-    const deleteTask = (title) => {
-        defaultProject.deleteTask(title);
+    const deleteTask = (props) => {
+        defaultProject.deleteTask(props.title);
         Object.values(customizedProjects).forEach(function(e){
-            e.deleteTask(title);
+            e.deleteTask(props.title);
         });
+
+        const projectRender = (customizedProjects[props.project.getName()])? 
+            customizedProjects[props.project.getName()] : defaultProject;
+
+        events.emit("renderTasks", projectRender);
     }
 
     const deleteProject = (title) => {
@@ -139,8 +156,8 @@ const taskManager = (() => {
     events.on("deleteProject", deleteProject);
     events.on("newTask", addTask);
     events.on("taskStatus", setTaskStatus);
-
-    return { addProject, addTask, setTaskProperty, setTaskStatus, deleteTask, deleteProject };
+    events.on("deleteTask", deleteTask);
+    events.on("setTask", setTaskProperty);
 
 })();
 
